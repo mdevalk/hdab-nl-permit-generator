@@ -4,6 +4,8 @@
 
 import PRIVATE_KEY_JWK from '../assets/keys/hdab-nl-signing-key-2025-v1.private.json'
 
+const ED25519 = { name: 'Ed25519' }
+
 const HDAB_NL_ISSUER = {
   authorityId:    'HDAB-NL',
   name:           'Health Data Access Body — Netherlands',
@@ -84,9 +86,9 @@ function toBase64Url(buffer) {
 }
 
 async function signPermit(permit) {
-  const privateKey = await crypto.subtle.importKey('jwk', PRIVATE_KEY_JWK, 'Ed25519', false, ['sign'])
+  const privateKey = await crypto.subtle.importKey('jwk', PRIVATE_KEY_JWK, ED25519, false, ['sign'])
   const encoded    = new TextEncoder().encode(JSON.stringify(canonicalPayload(permit)))
-  const sigBuffer  = await crypto.subtle.sign('Ed25519', privateKey, encoded)
+  const sigBuffer  = await crypto.subtle.sign(ED25519, privateKey, encoded)
   return toBase64Url(sigBuffer)
 }
 
