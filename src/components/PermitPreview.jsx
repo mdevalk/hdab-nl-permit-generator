@@ -70,7 +70,7 @@ export default function PermitPreview({ permit, draft }) {
           </div>
           {!draft && (
             <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
-              Key: {permit.issuer?.keyId} · Alg: {permit.issuer?.algorithm}
+              kid: {permit.issuer?.kid} · alg: {permit.issuer?.algorithm}
             </div>
           )}
         </div>
