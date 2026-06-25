@@ -138,6 +138,10 @@ export function exportPermitJson(permit) {
   const a    = document.createElement('a')
   a.href     = url
   a.download = `${permit.permitId}.json`
+  // Must be in the DOM for the click to trigger a download in Chromium/Electron
+  document.body.appendChild(a)
   a.click()
-  URL.revokeObjectURL(url)
+  document.body.removeChild(a)
+  // Revoke after a tick so the browser has time to start the download
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
