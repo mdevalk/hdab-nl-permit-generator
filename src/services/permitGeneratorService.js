@@ -59,7 +59,7 @@ export const EU_COUNTRIES = [
 function generatePermitId() {
   const year = new Date().getFullYear()
   const seq  = String(Math.floor(Math.random() * 89999) + 10001)
-  return `EHDB-${year}-NL-${seq}`
+  return `EHDS-${year}-NL-${seq}`
 }
 
 // The fields covered by the signature — must match the validator's canonicalPayload exactly.
