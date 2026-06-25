@@ -1,12 +1,16 @@
-// In production, replace mockSign() with real RS256 signing against the HDAB-NL private key.
+// Real Ed25519 signing using the bundled HDAB-NL private key.
+// The private key file (src/assets/keys/*.private.json) must never be committed
+// to a public repository — distribute it separately with the application binary.
+
+import PRIVATE_KEY_JWK from '../assets/keys/hdab-nl-signing-key-2025-v1.private.json'
 
 const HDAB_NL_ISSUER = {
-  authorityId: 'HDAB-NL',
-  name: 'Health Data Access Body — Netherlands',
-  country: 'NL',
+  authorityId:    'HDAB-NL',
+  name:           'Health Data Access Body — Netherlands',
+  country:        'NL',
   organizationId: 'NL-OIN-00000000008765432000',
-  keyId: 'hdab-nl-signing-key-2024-v1',
-  algorithm: 'RS256',
+  keyId:          'hdab-nl-signing-key-2025-v1',
+  algorithm:      'Ed25519',
 }
 
 export const LEGAL_BASES = [
@@ -52,46 +56,68 @@ export const EU_COUNTRIES = [
 
 function generatePermitId() {
   const year = new Date().getFullYear()
-  const seq = String(Math.floor(Math.random() * 89999) + 10001)
+  const seq  = String(Math.floor(Math.random() * 89999) + 10001)
   return `EHDB-${year}-NL-${seq}`
 }
 
-function mockSign(permit) {
-  const header  = btoa(JSON.stringify({ alg: HDAB_NL_ISSUER.algorithm, kid: HDAB_NL_ISSUER.keyId }))
-  const payload = btoa(JSON.stringify({ permitId: permit.permitId, issuedAt: permit.issuedAt, sub: permit.dataUser.organizationId }))
-  const sig     = btoa('hdab-nl-mock-sig-' + permit.permitId)
-  return `${header}.${payload}.${sig}`
+// The fields covered by the signature — must match the validator's canonicalPayload exactly.
+function canonicalPayload(permit) {
+  return {
+    permitId:       permit.permitId,
+    issuedAt:       permit.issuedAt,
+    expiresAt:      permit.expiresAt,
+    issuerKeyId:    permit.issuer.keyId,
+    dataUser:       permit.dataUser,
+    dataHolder:     permit.dataHolder,
+    speOperator:    permit.speOperator,
+    purpose:        permit.purpose,
+    legalBasis:     permit.legalBasis,
+    dataCategories: permit.dataCategories,
+    datasets:       permit.datasets,
+    conditions:     permit.conditions,
+  }
 }
 
-export function issuePermit(formData) {
-  const now       = new Date()
-  const permitId  = generatePermitId()
+function toBase64Url(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+}
+
+async function signPermit(permit) {
+  const privateKey = await crypto.subtle.importKey('jwk', PRIVATE_KEY_JWK, 'Ed25519', false, ['sign'])
+  const encoded    = new TextEncoder().encode(JSON.stringify(canonicalPayload(permit)))
+  const sigBuffer  = await crypto.subtle.sign('Ed25519', privateKey, encoded)
+  return toBase64Url(sigBuffer)
+}
+
+export async function issuePermit(formData) {
+  const now        = new Date()
+  const permitId   = generatePermitId()
   const validityMs = parseInt(formData.validityYears || '2') * 365.25 * 24 * 60 * 60 * 1000
 
   const permit = {
     permitId,
-    status: 'valid',
+    status:    'valid',
     issuedAt:  now.toISOString(),
     expiresAt: new Date(now.getTime() + validityMs).toISOString(),
     issuer: {
       ...HDAB_NL_ISSUER,
       signature: null,
-      signatureValid: true,
     },
     dataUser: {
-      name: formData.dataUserName,
+      name:           formData.dataUserName,
       organizationId: formData.dataUserOrgId,
-      country: formData.dataUserCountry,
+      country:        formData.dataUserCountry,
     },
     dataHolder: {
-      name: formData.dataHolderName,
+      name:           formData.dataHolderName,
       organizationId: formData.dataHolderOrgId,
-      country: formData.dataHolderCountry,
+      country:        formData.dataHolderCountry,
     },
     speOperator: {
-      name: formData.speOperatorName,
+      name:           formData.speOperatorName,
       organizationId: formData.speOperatorOrgId,
-      speType: formData.speType,
+      speType:        formData.speType,
     },
     purpose:        formData.purpose,
     legalBasis:     formData.legalBasis,
@@ -101,7 +127,7 @@ export function issuePermit(formData) {
     permitDocument: `HDAB-NL-PERMIT-${now.getFullYear()}-${permitId.split('-').pop()}.pdf`,
   }
 
-  permit.issuer.signature = mockSign(permit)
+  permit.issuer.signature = await signPermit(permit)
   return permit
 }
 

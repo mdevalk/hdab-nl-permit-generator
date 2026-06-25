@@ -1,0 +1,11 @@
+{
+  "key_ops": ["sign"],
+  "ext": true,
+  "alg": "Ed25519",
+  "crv": "Ed25519",
+  "d": "FyYIV9BLmoNasVUVAgyTZAzPge_vUEt0Ru73DGOYlZQ",
+  "x": "Oob343RfMvsZmcqTtSd3KOom-KrpLp6yRm86K2sh_aQ",
+  "kty": "OKP",
+  "kid": "hdab-nl-signing-key-2025-v1",
+  "use": "sig"
+}

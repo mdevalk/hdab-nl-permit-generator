@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Shield, Download, RotateCcw, Plus, X, CheckCircle } from 'lucide-react'
+import { Shield, Download, RotateCcw, Plus, X, CheckCircle, Loader } from 'lucide-react'
 import {
   issuePermit, exportPermitJson,
   LEGAL_BASES, DATA_CATEGORY_OPTIONS, SPE_TYPES,
@@ -32,7 +32,7 @@ function buildDraft(form) {
     status: 'valid',
     issuedAt:  new Date().toISOString(),
     expiresAt: new Date(Date.now() + validityMs).toISOString(),
-    issuer: { authorityId: 'HDAB-NL', keyId: 'hdab-nl-signing-key-2024-v1', algorithm: 'RS256' },
+    issuer: { authorityId: 'HDAB-NL', keyId: 'hdab-nl-signing-key-2025-v1', algorithm: 'Ed25519' },
     dataUser:    { name: form.dataUserName    || '—', organizationId: form.dataUserOrgId    || '—', country: form.dataUserCountry },
     dataHolder:  { name: form.dataHolderName  || '—', organizationId: form.dataHolderOrgId  || '—', country: form.dataHolderCountry },
     speOperator: { name: form.speOperatorName || '—', organizationId: form.speOperatorOrgId || '—', speType: form.speType },
@@ -45,9 +45,10 @@ function buildDraft(form) {
 }
 
 export default function GeneratePermitView() {
-  const [form, setForm]     = useState(EMPTY_FORM)
-  const [errors, setErrors] = useState({})
-  const [issued, setIssued] = useState(null)
+  const [form, setForm]       = useState(EMPTY_FORM)
+  const [errors, setErrors]   = useState({})
+  const [issued, setIssued]   = useState(null)
+  const [signing, setSigning] = useState(false)
 
   function update(field, value) {
     setForm(f => ({ ...f, [field]: value }))
@@ -72,11 +73,16 @@ export default function GeneratePermitView() {
     return Object.keys(errs).length === 0
   }
 
-  function handleSign() {
+  async function handleSign() {
     if (!validate()) return
-    const permit = issuePermit(form)
-    setIssued(permit)
-    exportPermitJson(permit)
+    setSigning(true)
+    try {
+      const permit = await issuePermit(form)
+      setIssued(permit)
+      exportPermitJson(permit)
+    } finally {
+      setSigning(false)
+    }
   }
 
   function handleReset() {
@@ -247,9 +253,7 @@ export default function GeneratePermitView() {
                       />
                       {form.datasets.length > 1 && (
                         <button onClick={() => update('datasets', form.datasets.filter((_, idx) => idx !== i))}
-                          style={{ color: 'var(--color-text-muted)', padding: 2, flexShrink: 0 }}>
-                          <X size={13} />
-                        </button>
+                          style={{ color: 'var(--color-text-muted)', padding: 2, flexShrink: 0 }}><X size={13} /></button>
                       )}
                     </div>
                   ))}
@@ -273,9 +277,7 @@ export default function GeneratePermitView() {
                         style={{ flex: 1, padding: '6px 8px', border: '1.5px solid var(--color-border)', borderRadius: 6, fontSize: 12, outline: 'none' }}
                       />
                       <button onClick={() => update('conditions', form.conditions.filter((_, idx) => idx !== i))}
-                        style={{ color: 'var(--color-text-muted)', padding: 2, flexShrink: 0 }}>
-                        <X size={13} />
-                      </button>
+                        style={{ color: 'var(--color-text-muted)', padding: 2, flexShrink: 0 }}><X size={13} /></button>
                     </div>
                   ))}
                 </div>
@@ -283,8 +285,6 @@ export default function GeneratePermitView() {
                   style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--color-primary)', fontWeight: 600, marginBottom: 14 }}>
                   <Plus size={13} /> Add condition
                 </button>
-
-                {/* Standard conditions picker */}
                 <div style={{ padding: 12, background: 'var(--color-bg)', borderRadius: 8, border: '1px solid var(--color-border)' }}>
                   <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
                     Standard HDAB-NL conditions
@@ -308,20 +308,25 @@ export default function GeneratePermitView() {
               </FormSection>
             </div>
 
-            {/* Sign button */}
             <div style={{ padding: '0 20px 20px' }}>
               <button
                 onClick={handleSign}
+                disabled={signing}
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   padding: '12px', borderRadius: 8,
-                  background: 'var(--color-primary)', color: '#fff', fontSize: 14, fontWeight: 700,
+                  background: signing ? '#93c5fd' : 'var(--color-primary)',
+                  color: '#fff', fontSize: 14, fontWeight: 700,
                   transition: 'background 0.15s',
+                  cursor: signing ? 'not-allowed' : 'pointer',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary-hover)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary)' }}
+                onMouseEnter={e => { if (!signing) e.currentTarget.style.background = 'var(--color-primary-hover)' }}
+                onMouseLeave={e => { if (!signing) e.currentTarget.style.background = 'var(--color-primary)' }}
               >
-                <Shield size={16} /> Sign &amp; Export Permit
+                {signing
+                  ? <><Loader size={15} style={{ animation: 'spin 1s linear infinite' }} /> Signing…</>
+                  : <><Shield size={16} /> Sign &amp; Export Permit</>
+                }
               </button>
             </div>
           </div>
@@ -342,19 +347,10 @@ export default function GeneratePermitView() {
   )
 }
 
-// ---- Form primitives ----
-
 function FormSection({ title, children, last }) {
   return (
-    <div style={{
-      marginBottom: last ? 0 : 20,
-      paddingBottom: last ? 0 : 20,
-      borderBottom: last ? 'none' : '1px solid var(--color-border)',
-    }}>
-      <div style={{
-        fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)',
-        textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12,
-      }}>
+    <div style={{ marginBottom: last ? 0 : 20, paddingBottom: last ? 0 : 20, borderBottom: last ? 'none' : '1px solid var(--color-border)' }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>
         {title}
       </div>
       {children}
@@ -377,16 +373,12 @@ function Field({ label, required, error, hint, children }) {
 
 function TextInput({ value, onChange, placeholder, error, mono }) {
   return (
-    <input
-      type="text" value={value}
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
+    <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
       style={{
         width: '100%', padding: '7px 10px',
         border: `1.5px solid ${error ? 'var(--color-revoked)' : 'var(--color-border)'}`,
         borderRadius: 6, fontSize: 13,
-        fontFamily: mono ? 'monospace' : 'inherit',
-        outline: 'none',
+        fontFamily: mono ? 'monospace' : 'inherit', outline: 'none',
       }}
       onFocus={e => { e.target.style.borderColor = error ? 'var(--color-revoked)' : 'var(--color-primary)' }}
       onBlur={e =>  { e.target.style.borderColor = error ? 'var(--color-revoked)' : 'var(--color-border)' }}
@@ -397,12 +389,7 @@ function TextInput({ value, onChange, placeholder, error, mono }) {
 function SelectInput({ value, onChange, options }) {
   return (
     <select value={value} onChange={e => onChange(e.target.value)}
-      style={{
-        width: '100%', padding: '7px 10px',
-        border: '1.5px solid var(--color-border)',
-        borderRadius: 6, fontSize: 13,
-        background: 'var(--color-surface)', outline: 'none',
-      }}
+      style={{ width: '100%', padding: '7px 10px', border: '1.5px solid var(--color-border)', borderRadius: 6, fontSize: 13, background: 'var(--color-surface)', outline: 'none' }}
     >
       {options.map(o => <option key={o} value={o}>{o}</option>)}
     </select>
