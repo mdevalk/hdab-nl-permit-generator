@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Shield, Download, RotateCcw, Plus, X, CheckCircle, Loader } from 'lucide-react'
+import { Shield, Download, RotateCcw, Plus, X, CheckCircle, Loader, AlertCircle } from 'lucide-react'
 import {
   issuePermit, exportPermitJson,
   LEGAL_BASES, DATA_CATEGORY_OPTIONS, SPE_TYPES,
@@ -49,6 +49,7 @@ export default function GeneratePermitView() {
   const [errors, setErrors]   = useState({})
   const [issued, setIssued]   = useState(null)
   const [signing, setSigning] = useState(false)
+  const [signError, setSignError] = useState(null)
 
   function update(field, value) {
     setForm(f => ({ ...f, [field]: value }))
@@ -76,10 +77,13 @@ export default function GeneratePermitView() {
   async function handleSign() {
     if (!validate()) return
     setSigning(true)
+    setSignError(null)
     try {
       const permit = await issuePermit(form)
       setIssued(permit)
       exportPermitJson(permit)
+    } catch (err) {
+      setSignError(err?.message || 'Signing failed — check browser console for details')
     } finally {
       setSigning(false)
     }
@@ -89,6 +93,7 @@ export default function GeneratePermitView() {
     setForm(EMPTY_FORM)
     setIssued(null)
     setErrors({})
+    setSignError(null)
   }
 
   const preview = issued || buildDraft(form)
@@ -309,6 +314,16 @@ export default function GeneratePermitView() {
             </div>
 
             <div style={{ padding: '0 20px 20px' }}>
+              {signError && (
+                <div style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 10,
+                  padding: '10px 12px', borderRadius: 7,
+                  background: '#fef2f2', border: '1px solid var(--color-revoked)',
+                }}>
+                  <AlertCircle size={14} color="var(--color-revoked)" style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span style={{ fontSize: 12, color: 'var(--color-revoked)' }}>{signError}</span>
+                </div>
+              )}
               <button
                 onClick={handleSign}
                 disabled={signing}
