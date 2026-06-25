@@ -11,7 +11,7 @@ const HDAB_NL_ISSUER = {
   name:           'Health Data Access Body — Netherlands',
   country:        'NL',
   organizationId: 'NL-OIN-00000000008765432000',
-  keyId:          'hdab-nl-signing-key-2025-v1',
+  kid:            'hdab-nl-signing-key-2025-v1',
   algorithm:      'Ed25519',
 }
 
@@ -68,7 +68,7 @@ function canonicalPayload(permit) {
     permitId:       permit.permitId,
     issuedAt:       permit.issuedAt,
     expiresAt:      permit.expiresAt,
-    issuerKeyId:    permit.issuer.keyId,
+    issuerKid:      permit.issuer.kid,
     dataUser:       permit.dataUser,
     dataHolder:     permit.dataHolder,
     speOperator:    permit.speOperator,
