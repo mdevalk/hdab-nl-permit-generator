@@ -1,7 +1,7 @@
 import React from 'react'
 import {
   CheckCircle, XCircle, AlertTriangle,
-  Building2, User, Shield, FileText, Tag, BadgeCheck, Clock, KeyRound,
+  Building2, User, Shield, FileText, Tag, BadgeCheck, Clock,
 } from 'lucide-react'
 
 const STATUS_CONFIG = {
@@ -25,11 +25,11 @@ function Section({ title, icon: Icon, children }) {
   )
 }
 
-function Field({ label, value, mono }) {
+function Field({ label, value }) {
   return (
     <div style={{ marginBottom: 5 }}>
       <span style={{ color: 'var(--color-text-muted)', fontSize: 12 }}>{label}: </span>
-      <span style={{ fontSize: 12, fontFamily: mono ? 'monospace' : 'inherit', wordBreak: 'break-all' }}>{value || '—'}</span>
+      <span style={{ fontSize: 12 }}>{value || '—'}</span>
     </div>
   )
 }
@@ -53,7 +53,7 @@ export default function PermitPreview({ permit, draft }) {
       opacity: draft ? 0.92 : 1,
       transition: 'border-color 0.2s, opacity 0.2s',
     }}>
-      {/* Issuer banner */}
+      {/* Issuer / draft banner */}
       <div style={{
         padding: '10px 18px',
         background: draft ? 'var(--color-bg)' : '#f0fdf4',
@@ -70,7 +70,7 @@ export default function PermitPreview({ permit, draft }) {
           </div>
           {!draft && (
             <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
-              {permit.issuer?.authorityId} · {permit.issuer?.organizationId}
+              Key: {permit.issuer?.keyId} · Alg: {permit.issuer?.algorithm}
             </div>
           )}
         </div>
@@ -162,22 +162,6 @@ export default function PermitPreview({ permit, draft }) {
           ) : (
             <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>No conditions added</span>
           )}
-        </Section>
-
-        <Section title="Cryptographic Signature" icon={KeyRound}>
-          <Field label="Authority"  value={permit.issuer?.authorityId} />
-          <Field label="Key ID"     value={permit.issuer?.keyId} mono />
-          <Field label="Algorithm"  value={permit.issuer?.algorithm} />
-          <div style={{ marginBottom: 5 }}>
-            <span style={{ color: 'var(--color-text-muted)', fontSize: 12 }}>Signature: </span>
-            {draft || !permit.issuer?.signature ? (
-              <span style={{ fontSize: 12, color: 'var(--color-text-muted)', fontStyle: 'italic' }}>generated upon signing</span>
-            ) : (
-              <span style={{ fontSize: 11, fontFamily: 'monospace', wordBreak: 'break-all', color: 'var(--color-text)' }}>
-                {permit.issuer.signature}
-              </span>
-            )}
-          </div>
         </Section>
       </div>
     </div>
