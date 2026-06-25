@@ -1,7 +1,4 @@
 // In production, replace mockSign() with real RS256 signing against the HDAB-NL private key.
-// Replace getIssuedPermits/savePermit with calls to a backend registry API.
-
-const STORAGE_KEY = 'hdab_issued_permits'
 
 const HDAB_NL_ISSUER = {
   authorityId: 'HDAB-NL',
@@ -60,21 +57,21 @@ function generatePermitId() {
 }
 
 function mockSign(permit) {
-  const header = btoa(JSON.stringify({ alg: HDAB_NL_ISSUER.algorithm, kid: HDAB_NL_ISSUER.keyId }))
+  const header  = btoa(JSON.stringify({ alg: HDAB_NL_ISSUER.algorithm, kid: HDAB_NL_ISSUER.keyId }))
   const payload = btoa(JSON.stringify({ permitId: permit.permitId, issuedAt: permit.issuedAt, sub: permit.dataUser.organizationId }))
-  const sig = btoa('hdab-nl-mock-sig-' + permit.permitId)
+  const sig     = btoa('hdab-nl-mock-sig-' + permit.permitId)
   return `${header}.${payload}.${sig}`
 }
 
 export function issuePermit(formData) {
-  const now = new Date()
-  const permitId = generatePermitId()
+  const now       = new Date()
+  const permitId  = generatePermitId()
   const validityMs = parseInt(formData.validityYears || '2') * 365.25 * 24 * 60 * 60 * 1000
 
   const permit = {
     permitId,
     status: 'valid',
-    issuedAt: now.toISOString(),
+    issuedAt:  now.toISOString(),
     expiresAt: new Date(now.getTime() + validityMs).toISOString(),
     issuer: {
       ...HDAB_NL_ISSUER,
@@ -96,11 +93,11 @@ export function issuePermit(formData) {
       organizationId: formData.speOperatorOrgId,
       speType: formData.speType,
     },
-    purpose: formData.purpose,
-    legalBasis: formData.legalBasis,
+    purpose:        formData.purpose,
+    legalBasis:     formData.legalBasis,
     dataCategories: formData.dataCategories,
-    datasets: formData.datasets,
-    conditions: formData.conditions.filter(c => c.trim()),
+    datasets:       formData.datasets,
+    conditions:     formData.conditions.filter(c => c.trim()),
     permitDocument: `HDAB-NL-PERMIT-${now.getFullYear()}-${permitId.split('-').pop()}.pdf`,
   }
 
@@ -108,43 +105,12 @@ export function issuePermit(formData) {
   return permit
 }
 
-export function savePermit(permit) {
-  const stored = getIssuedPermits()
-  stored.unshift(permit)
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored))
-  } catch {
-    stored.pop()
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored))
-  }
-}
-
-export function getIssuedPermits() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
-
-export function revokePermit(permitId, reason) {
-  const permits = getIssuedPermits()
-  const updated = permits.map(p =>
-    p.permitId === permitId
-      ? { ...p, status: 'revoked', revokedAt: new Date().toISOString(), revocationReason: reason }
-      : p
-  )
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-  return updated
-}
-
 export function exportPermitJson(permit) {
   const json = JSON.stringify(permit, null, 2)
   const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href     = url
   a.download = `${permit.permitId}.json`
   a.click()
   URL.revokeObjectURL(url)
