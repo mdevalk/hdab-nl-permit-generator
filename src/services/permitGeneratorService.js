@@ -3,7 +3,11 @@
 // to a public repository — distribute it separately with the application binary.
 
 import * as ed from '@noble/ed25519'
+import { sha512 } from '@noble/hashes/sha512'
 import PRIVATE_KEY_JWK from '../assets/keys/hdab-nl-signing-key-2025-v1.private.json'
+
+// Required by @noble/ed25519 v2 when crypto.subtle is unavailable or restricted.
+ed.etc.sha512Sync = (...m) => sha512(...m)
 
 const HDAB_NL_ISSUER = {
   authorityId:    'HDAB-NL',
