@@ -2,9 +2,8 @@
 // The private key file (src/assets/keys/*.private.json) must never be committed
 // to a public repository — distribute it separately with the application binary.
 
+import * as ed from '@noble/ed25519'
 import PRIVATE_KEY_JWK from '../assets/keys/hdab-nl-signing-key-2025-v1.private.json'
-
-const ED25519 = { name: 'Ed25519' }
 
 const HDAB_NL_ISSUER = {
   authorityId:    'HDAB-NL',
@@ -80,16 +79,21 @@ function canonicalPayload(permit) {
   }
 }
 
-function toBase64Url(buffer) {
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+function fromBase64Url(b64) {
+  const b64std = b64.replace(/-/g, '+').replace(/_/g, '/')
+  return Uint8Array.from(atob(b64std), c => c.charCodeAt(0))
+}
+
+function toBase64Url(bytes) {
+  return btoa(String.fromCharCode(...bytes))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
 async function signPermit(permit) {
-  const privateKey = await crypto.subtle.importKey('jwk', PRIVATE_KEY_JWK, ED25519, false, ['sign'])
-  const encoded    = new TextEncoder().encode(JSON.stringify(canonicalPayload(permit)))
-  const sigBuffer  = await crypto.subtle.sign(ED25519, privateKey, encoded)
-  return toBase64Url(sigBuffer)
+  const privateKeyBytes = fromBase64Url(PRIVATE_KEY_JWK.d)
+  const encoded         = new TextEncoder().encode(JSON.stringify(canonicalPayload(permit)))
+  const sigBytes        = await ed.sign(encoded, privateKeyBytes)
+  return toBase64Url(sigBytes)
 }
 
 export async function issuePermit(formData) {
