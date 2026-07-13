@@ -4,7 +4,7 @@ This file provides context for AI-assisted development on this repository.
 
 ## Project Purpose
 
-A community-driven reference implementation of a digital permit issuance tool for Health Data Access Bodies (HDABs) under the European Health Data Space (EHDS) regulation. It issues, signs and exports digital data access permits as machine-readable, cryptographically signed JSON documents that authorise a health data user to process specific datasets in a Secure Processing Environment (SPE).
+A community-driven desktop application for Health Data Access Bodies (HDABs) to issue, sign and export digital data access permits under the European Health Data Space (EHDS) regulation. Permits are machine-readable, cryptographically signed JSON documents that authorise a health data user to process specific datasets in a Secure Processing Environment (SPE).
 
 ## Regulatory Framework
 
