@@ -1,0 +1,49 @@
+{
+  "permitId": "EHDS-2024-NL-00142",
+  "status": "valid",
+  "issuedAt": "2024-03-01T09:00:00Z",
+  "expiresAt": "2026-03-01T09:00:00Z",
+  "permitDocument": "HDAB-NL-PERMIT-2024-00142.pdf",
+  "issuer": {
+    "authorityId": "HDAB-NL",
+    "name": "Health Data Access Body — Netherlands",
+    "country": "NL",
+    "organizationId": "NL-OIN-00000000008765432000",
+    "kid": "hdab-nl-signing-key-2025-v1",
+    "algorithm": "Ed25519",
+    "signature": "7QZ6Hhs0lKFy3ocnJhSpOFdpVnabR3Ls5zFtRzgcDCV_EGIiQuONdTOLIX0-q9nmF4LvUqtcZm7btA-_FNfhDA"
+  },
+  "dataUser": {
+    "name": "Amsterdam UMC Research Institute",
+    "organizationId": "NL-KVK-34375365",
+    "country": "NL"
+  },
+  "dataHolder": {
+    "name": "RIVM National Institute for Public Health",
+    "organizationId": "NL-OIN-00000000003214345000",
+    "country": "NL"
+  },
+  "speOperator": {
+    "name": "CBS Secure Processing Environment",
+    "organizationId": "NL-OIN-00000000001234567000",
+    "speType": "Remote Access SPE"
+  },
+  "purpose": "Scientific research — cardiovascular disease epidemiology",
+  "legalBasis": "EHDS Article 54(1)(a) — Scientific research",
+  "dataCategories": [
+    "Electronic health records",
+    "Medical imaging data",
+    "Genomic data (aggregated)"
+  ],
+  "datasets": [
+    {
+      "id": "RIVM-DS-2019-CVD",
+      "name": "Cardiovascular Disease Registry 2010–2023"
+    }
+  ],
+  "conditions": [
+    "Data must be processed within the designated SPE only",
+    "No re-identification of natural persons permitted",
+    "Results must be reviewed by HDAB before publication"
+  ]
+}
