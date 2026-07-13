@@ -40,28 +40,11 @@ TEHDAS2 (Towards the European Health Data Space, Joint Action 2) provides operat
 
 ## Digital Permit Schema
 
-The permit schema is in `schema/permit.schema.json` (JSON Schema draft 2020-12). It is derived from the TEHDAS2 Annex 9 paper permit template, keeping only fields strictly required for machine-readable verification and SPE access control.
-
-### Mapping: Annex 9 → Digital Permit
-
-| Annex 9 Section | Schema Field |
-|---|---|
-| Permit reference number | `permitId` |
-| Date of authorisation | `issuedAt` |
-| Access period | `expiresAt` |
-| Issuing authority (HDAB) | `issuer` (includes `kid`, `signature`) |
-| Health data user | `dataUser` |
-| Data holder(s) | `dataHolder` |
-| Secure processing environment | `speOperator` |
-| Purpose (Art. 53(1)) | `purpose` |
-| Legal basis | `legalBasis` |
-| Data categories | `dataCategories` |
-| Datasets / data sources | `datasets` |
-| Conditions | `conditions` |
+The permit schema is in `schema/permit.schema.json` (JSON Schema draft 2020-12). It is derived from the TEHDAS2 D6.3 Annex 9 paper permit template, keeping only fields strictly required for machine-readable verification and SPE access control.
 
 ### Legal Basis Values (Art. 54(1))
 
-The `legalBasis` field is an enum restricted to the six permitted purposes under EHDS Art. 53(1), expressed as Article 54(1) sub-references:
+The `legalBasis` field is an enum restricted to the permitted purposes under EHDS Art. 53(1), expressed as Article 54(1) sub-references:
 
 - `Art. 54(1)(a)` — public interest / public or occupational health
 - `Art. 54(1)(b)` — policy-making and regulatory activities
