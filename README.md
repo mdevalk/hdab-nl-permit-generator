@@ -60,7 +60,7 @@ The issuer's public key is published at `.well-known/jwks.json` following the co
 
 > **Security notice:** The private key file (`src/assets/keys/*.private.json`) must **never** be committed to a public repository. Distribute it separately alongside the application binary.
 
-The key bundled in this repository (`src/assets/keys/hdab-nl-signing-key-2025-v1.private.json`) is an **example key only**. It is included solely to allow the application to run out of the box for development and demonstration purposes. Replace it with the real HDAB-NL signing key before issuing live permits.
+The key bundled in this repository (`src/assets/keys/hdab-nl-signing-key-2025-v1.private.json`) is an **example key only**. It is included solely to allow the application to run out of the box for development and demonstration purposes.
 
 The key is loaded at runtime from `src/assets/keys/hdab-nl-signing-key-2025-v1.private.json` (JWK format, OKP/Ed25519).
 
@@ -79,7 +79,7 @@ The JSON Schema for EHDS permits is in `schema/permit.schema.json` (JSON Schema 
 │   └── permit.schema.json                # JSON Schema for EHDS permits
 ├── src/
 │   ├── App.jsx                           # Root component
-│   ├── assets/
+├── assets/
 │   │   └── keys/
 │   │       └── *.private.json            # Signing key (not committed to public repos)
 │   ├── components/
