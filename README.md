@@ -1,10 +1,10 @@
 # HDAB-NL Permit Generator
 
-A cross-platform desktop application for issuing, signing and exporting EHDS health data access permits on behalf of the Health Data Access Body — Netherlands (HDAB-NL). Built with Electron, React, and Vite.
+A cross-platform desktop application for Health Data Access Bodies to issue, sign and export EHDS health data access permits. Built with Electron, React, and Vite.
 
 ## Overview
 
-Under the European Health Data Space (EHDS) regulation, Health Data Access Bodies (HDABs) are responsible for granting organisations access to health data for secondary use. This application allows HDAB-NL officers to:
+Under the European Health Data Space (EHDS) regulation, Health Data Access Bodies (HDABs) are responsible for granting organisations access to health data for secondary use. This application provides HDAB-NL with the tooling to:
 
 - Fill in all permit fields (data user, data holder, SPE operator, legal basis, datasets, conditions)
 - Cryptographically sign the permit with the HDAB-NL Ed25519 private key
@@ -39,7 +39,7 @@ npm install
 npm run dev
 ```
 
-This starts the Vite dev server on port 5173 and launches Electron pointing at it.
+This starts the Vite dev server on port 5174 and launches Electron pointing at it.
 
 ### Build a distributable
 
