@@ -72,18 +72,6 @@ fields strictly required for machine-readable verification and SPE access contro
 - **D7.1 — Guideline on how to use data in a secure processing environment** —
   <https://tehdas.eu/wp-content/uploads/2025/07/d7.1-guideline-on-how-to-use-data-in-a-secure-processing-environment.pdf>
 
-### Legal Basis Values (Art. 54(1))
-
-The `legalBasis` field is an enum restricted to the permitted purposes under EHDS Art. 53(1),
-expressed as Article 54(1) sub-references:
-
-- `Art. 54(1)(a)` — public interest / public or occupational health
-- `Art. 54(1)(b)` — policy-making and regulatory activities
-- `Art. 54(1)(c)` — statistics
-- `Art. 54(1)(d)` — education or teaching activities
-- `Art. 54(1)(e)` — scientific research related to health or care
-- `Art. 54(1)(f)` — improvement of delivery of care / optimisation of treatment
-
 ### Cryptographic Signing
 
 - Algorithm: **Ed25519** via `@noble/ed25519` (pure JS, no Web Crypto API dependency)
