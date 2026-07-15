@@ -1,50 +1,81 @@
-# CLAUDE.md — HDAB-NL Permit Generator
+# CLAUDE.md
 
-This file provides context for AI-assisted development on this repository.
+## 1. Think Before Coding
 
-## Project Purpose
+Don't assume. Don't hide confusion. Surface tradeoffs.
 
-An open-source, community-driven desktop application for Health Data Access Bodies (HDABs) to issue, sign and export digital data access permits under the European Health Data Space (EHDS) regulation. Permits are machine-readable, cryptographically signed JSON documents that authorise a health data user to process specific datasets in a Secure Processing Environment (SPE).
+Before implementing:
 
-## Regulatory Framework
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them — don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-### EHDS Regulation
+## 2. Simplicity First
 
-**Regulation (EU) 2025/327** of the European Parliament and of the Council on the European Health Data Space.
+Minimum code that solves the problem. Nothing speculative.
 
-Key articles for this project:
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No “flexibility” or “configurability” that wasn’t requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-| Article | Subject |
-|---|---|
-| Art. 53(1) | Permitted purposes for secondary use of health data |
-| Art. 67 | Health data access applications |
-| Art. 68 | Granting of data permits; requirements and conditions |
-| Art. 69 | Access to data in anonymised statistical format |
-| Art. 70 | Implementing acts (application form, permit template) |
-| Art. 71 | Right to opt out |
-| Art. 72 | Trusted data holders |
-| Art. 73 | Cross-border data access |
+Ask yourself: “Would a senior engineer say this is overcomplicated?” If yes, simplify.
 
-Full text: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202500327
+## 3. Surgical Changes
 
-### TEHDAS2 Guidelines
+Touch only what you must. Clean up only your own mess.
 
-TEHDAS2 (Towards the European Health Data Space, Joint Action 2) provides operational guidance for HDABs implementing the EHDS regulation.
+When editing existing code:
 
-| Document | Description | URL |
-|---|---|---|
-| **D6.3** | Guideline for HDABs on procedures and formats for data access. Contains **Annex 9** (data permit template) and **Annex 10** (data request approval template). Primary reference for the digital permit schema. | https://tehdas.eu/wp-content/uploads/2025/09/draft-guideline-for-health-data-access-bodies-on-the-procedures-and-formats-for-data-access.pdf |
-| **M6.1** | Guideline for health data holders on making personal and non-personal electronic health data available for reuse | https://tehdas.eu/wp-content/uploads/2025/09/draft-guideline-for-health-data-holders-on-making-personal-and-non-personal-electronic-health-data-available-for-reuse.pdf |
-| **M6.2** | Draft guideline for data users on good application and access practice | https://tehdas.eu/wp-content/uploads/2025/01/2025-01-20-tehdas2-milestone-6.2.pdf |
-| **D7.1** | Guideline on how to use data in a secure processing environment | https://tehdas.eu/wp-content/uploads/2025/07/d7.1-guideline-on-how-to-use-data-in-a-secure-processing-environment.pdf |
+- Don’t “improve” adjacent code, comments, or formatting.
+- Don’t refactor things that aren’t broken.
+- Match existing style, even if you’d do it differently.
+- If you notice unrelated dead code, mention it — don’t delete it.
 
-## Digital Permit Schema
+When your changes create orphans:
 
-The permit schema is in `schema/permit.schema.json` (JSON Schema draft 2020-12). It is derived from the TEHDAS2 D6.3 Annex 9 paper permit template, keeping only fields strictly required for machine-readable verification and SPE access control.
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don’t remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user’s request.
+
+## Regulatory Context
+
+This project is an open-source, community-driven desktop application for Health Data Access
+Bodies (HDABs) to issue, sign and export digital data access permits under the EHDS regulation.
+Always use the **final** Regulation numbering, not the draft-proposal numbering.
+
+The digital permit is a machine-readable, cryptographically signed JSON document (Ed25519)
+that authorises a health data user to process specific datasets in a Secure Processing
+Environment (SPE). The permit schema is derived from TEHDAS2 D6.3 Annex 9, keeping only
+fields strictly required for machine-readable verification and SPE access control.
+
+### EHDS Legal Text
+
+- **Regulation (EU) 2025/327** establishing the European Health Data Space (EHDS) —
+  <https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng>
+  - Relevant part: **Chapter IV — Secondary use of electronic health data** (Articles 51–80).
+  - Key articles used in this codebase: Art. 53 (purposes for secondary use), Art. 54
+    (legal basis values for `legalBasis` field), Art. 67 (health data access applications),
+    Art. 68 (data permit), Art. 73 (secure processing environment).
+
+### TEHDAS2 Documentation
+
+- **D6.3 — Guideline for HDABs on the procedures and formats for data access** (contains
+  **Annex 9** — data permit template, and **Annex 10** — data request approval template;
+  primary reference for the digital permit schema) —
+  <https://tehdas.eu/wp-content/uploads/2025/09/draft-guideline-for-health-data-access-bodies-on-the-procedures-and-formats-for-data-access.pdf>
+- **D6.2 — Guideline for data users on good application and access practice** —
+  <https://tehdas.eu/wp-content/uploads/2025/10/d6.2-guideline-for-data-users-on-good-application-and-access-practice.pdf>
+- **D7.1 — Guideline on how to use data in a secure processing environment** —
+  <https://tehdas.eu/wp-content/uploads/2025/07/d7.1-guideline-on-how-to-use-data-in-a-secure-processing-environment.pdf>
 
 ### Legal Basis Values (Art. 54(1))
 
-The `legalBasis` field is an enum restricted to the permitted purposes under EHDS Art. 53(1), expressed as Article 54(1) sub-references:
+The `legalBasis` field is an enum restricted to the permitted purposes under EHDS Art. 53(1),
+expressed as Article 54(1) sub-references:
 
 - `Art. 54(1)(a)` — public interest / public or occupational health
 - `Art. 54(1)(b)` — policy-making and regulatory activities
@@ -53,26 +84,12 @@ The `legalBasis` field is an enum restricted to the permitted purposes under EHD
 - `Art. 54(1)(e)` — scientific research related to health or care
 - `Art. 54(1)(f)` — improvement of delivery of care / optimisation of treatment
 
-## Cryptographic Signing
+### Cryptographic Signing
 
 - Algorithm: **Ed25519** via `@noble/ed25519` (pure JS, no Web Crypto API dependency)
 - Key format: JWK (OKP, `crv: Ed25519`)
-- Public key published at: `.well-known/jwks.json` (RFC 7517 + RFC 8037 compliant)
+- Public key published at `.well-known/jwks.json` (RFC 7517 + RFC 8037 compliant)
 - Signature covers a canonical payload — a deterministic subset of permit fields
 - Base64url encoding (RFC 4648 §5, no padding)
-
-## Security Constraints
-
-- The private key file (`src/assets/keys/*.private.json`) must **never** be committed to a public repository
-- The key bundled in this repo is an **example key only** for development and demonstration
-- Distribute the real signing key separately alongside the application binary
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Shell | Electron 33 |
-| UI | React 18 + Vite 6 |
-| Crypto | @noble/ed25519 + @noble/hashes |
-| Packaging | electron-builder |
-| Dev port | 5174 (validator uses 5173) |
+- The private key file (`src/assets/keys/*.private.json`) must **never** be committed to a
+  public repository; the bundled key is an **example key only**
